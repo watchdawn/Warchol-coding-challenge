@@ -131,29 +131,37 @@ function compactParseUsageArray(usageArray) {
       //   console.log('different');
     }
   }
+  compactUsageArray.shift();
   console.log(compactUsageArray);
 }
 
 //combine the arrays
 //const combinedArray = productArray.map()
 function combineArrays() {
-  console.log('product array: ');
-  console.log(productArray);
+    //select item from productArray
     for (let product of productArray) {
+        let flag2 = null;
+        //select item  from compactUsage Array and compare the object.Product looking for match
       for (let bit of compactUsageArray) {
         if (product.Products !== bit.Products) {
           flag2 = false;
         } else if (product.Products === bit.Products) {
           flag2 = true;
+          break;
         }
       }
+      // take usage amount from usageArray and add it to productArray
       if (flag2 === true) {
-        product.Usage = bit.Usage;
+        let objectUsage = compactUsageArray.findIndex(
+            (bit) => bit.Products === product.Products
+          );
+        product.Usage = compactUsageArray[objectUsage].Usage;
+        //If product is not in compactUsageArray assign usage value to zero
       } else if (flag2 === false) {
           product.Usage = 0;
       };
-      //console.log(productArray);
     }
+    console.log(productArray);
 }
 
 function outPutData(event) {
