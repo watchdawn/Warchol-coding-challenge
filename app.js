@@ -12,63 +12,32 @@ let productArray = [];
 //read file
 function readFile(event) {
   event.preventDefault();
-  
-    const csvCategories = csvProductFile.files[0];
-    const csvAmounts = csvUsageFile.files[0];
 
-    const productReader = new FileReader();
-    productReader.addEventListener('load', function (event) {
-      const text = event.target.result;
-      parseProductCsv(text);
-    });
+  const csvCategories = csvProductFile.files[0];
+  const csvAmounts = csvUsageFile.files[0];
 
-    const usageReader = new FileReader();
-    usageReader.addEventListener('load', function (event) {
-      const text = event.target.result;
-      parseUsageCsv(text);
-      compactParseUsageArray(usageArray);
-    });
+  //read the category and product file
+  const productReader = new FileReader();
+  productReader.addEventListener('load', function (event) {
+    const text = event.target.result;
+    parseProductCsv(text);
+  });
 
-    productReader.readAsText(csvCategories);
-    usageReader.readAsText(csvAmounts);
-  };
+  //read the product and usage file
+  const usageReader = new FileReader();
+  usageReader.addEventListener('load', function (event) {
+    const text = event.target.result;
+    parseUsageCsv(text);
+    compactParseUsageArray(usageArray);
+  });
+
+  productReader.readAsText(csvCategories);
+  usageReader.readAsText(csvAmounts);
+}
 
 //parse data
-
 function parseProductCsv(str) {
-    key = new Array('Products', 'Categories');
-    const prodCat = str.trim().split('\n');
-  
-    //create new array of items from productCategory sheet so that items are separated by ; rather than ,
-    let adjProdCat = [];
-    for (let item of prodCat) {
-      commaIndex = item.lastIndexOf(',');
-      item = item.split('');
-      item[commaIndex] = ';';
-      item = item.join('');
-      adjProdCat.push(item);
-    }
-  
-    //use map to create new array that has key value pair objects created by reduce
-    productArray = adjProdCat.map(function (r) {
-      const values = r.trim().split(';');
-  
-      const element = key.reduce(function (object, key, index) {
-        object[key] = values[index];
-        return object;
-      }, {});
-  
-      return element;
-    });
-  
-    // console.log(key)
-    //console.log(prodCat);
-    //console.log(adjProdCat);
-    console.log(productArray);
-  }
-
-function parseUsageCsv(str) {
-  key = new Array('Products', 'Usage'); // add 'Usage' to array
+  key = new Array('Products', 'Categories');
   const prodCat = str.trim().split('\n');
 
   //create new array of items from productCategory sheet so that items are separated by ; rather than ,
@@ -81,6 +50,39 @@ function parseUsageCsv(str) {
     adjProdCat.push(item);
   }
 
+  //use map to create new array that has key value pair objects created by reduce
+  productArray = adjProdCat.map(function (r) {
+    const values = r.trim().split(';');
+
+    const element = key.reduce(function (object, key, index) {
+      object[key] = values[index];
+      return object;
+    }, {});
+
+    return element;
+  });
+
+  // console.log(key)
+  //console.log(prodCat);
+  //console.log(adjProdCat);
+  console.log(productArray);
+}
+
+function parseUsageCsv(str) {
+  key = new Array('Products', 'Usage');
+  const prodCat = str.trim().split('\n');
+
+  //create new array of items from productCategory sheet so that items are separated by ; rather than ,
+  let adjProdCat = [];
+  for (let item of prodCat) {
+    commaIndex = item.lastIndexOf(',');
+    item = item.split('');
+    item[commaIndex] = ';';
+    item = item.join('');
+    adjProdCat.push(item);
+  }
+
+  //map the items in adjProdCat to product and usage keys after splitting values on ;
   usageArray = adjProdCat.map(function (r) {
     const values = r.trim().split(';');
     values[1] = parseInt(values[1]);
@@ -106,29 +108,27 @@ let compactUsageArray = [{ Products: '', Usage: null }];
 function compactParseUsageArray(usageArray) {
   for (let object of usageArray) {
     let flag = false;
-    // console.log('I have entered the first loop');
-    // console.log(object.Products);
+
     for (let bit of compactUsageArray) {
-      //   console.log('i have entered the second loop');
+
+// compare if product exists in both arrays
       if (object.Products !== bit.Products) {
         flag = false;
       } else if (object.Products === bit.Products) {
         flag = true;
       }
     }
-    // console.log(flag);
+
+    // add usages together
     if (flag === true) {
-      //   console.log('i have left the second loop');
-      //   console.log('the same');
       let objectIndex = compactUsageArray.findIndex(
         (bit) => bit.Products === object.Products
       );
-      //   console.log(objectIndex);
       compactUsageArray[objectIndex].Usage =
         compactUsageArray[objectIndex].Usage + object.Usage;
+        // add new product to the array
     } else if (flag === false) {
       compactUsageArray.push(object);
-      //   console.log('different');
     }
   }
   compactUsageArray.shift();
@@ -138,116 +138,116 @@ function compactParseUsageArray(usageArray) {
 //combine the arrays
 //const combinedArray = productArray.map()
 function combineArrays() {
-    //select item from productArray
-    for (let product of productArray) {
-        let flag2 = null;
-        //select item  from compactUsage Array and compare the object.Product looking for match
-      for (let bit of compactUsageArray) {
-        if (product.Products !== bit.Products) {
-          flag2 = false;
-        } else if (product.Products === bit.Products) {
-          flag2 = true;
-          break;
-        }
-      }
-      // take usage amount from usageArray and add it to productArray
-      if (flag2 === true) {
-        let objectUsage = compactUsageArray.findIndex(
-            (bit) => bit.Products === product.Products
-          );
-        product.Usage = compactUsageArray[objectUsage].Usage;
-        //If product is not in compactUsageArray assign usage value to zero
-      } else if (flag2 === false) {
-          product.Usage = 0;
-      };
-    }
-    console.log(productArray);
+  //select item from productArray
+  for (let product of productArray) {
+    let flag2 = null;
 
-    categoryRanking();
-    commonCompMaxUsage();
-    antibodyMaxUsage();
+    //select item  from compactUsage Array and compare the object.Product looking for match
+    for (let bit of compactUsageArray) {
+      if (product.Products !== bit.Products) {
+        flag2 = false;
+      } else if (product.Products === bit.Products) {
+        flag2 = true;
+        break;
+      }
+    }
+
+    // take usage amount from usageArray and add it to productArray
+    if (flag2 === true) {
+      let objectUsage = compactUsageArray.findIndex(
+        (bit) => bit.Products === product.Products
+      );
+      product.Usage = compactUsageArray[objectUsage].Usage;
+      //If product is not in compactUsageArray assign usage value to zero
+    } else if (flag2 === false) {
+      product.Usage = 0;
+    }
+  }
+
+  console.log(productArray);
+
+  categoryRanking();
+  commonCompMaxUsage();
+  antibodyMaxUsage();
 }
 
 //rank Categories by amount of usage (greatest to least)
 // Categories: Common Compound, Acid, Antibody, Bases
 function categoryRanking() {
-    let acidUsage = null;
-    let antibodyUsage = null;
-    let baseUsage = null;
-    let commonCompUsage = null;
-    let categoryUsage = [];
+  let acidUsage = null;
+  let antibodyUsage = null;
+  let baseUsage = null;
+  let commonCompUsage = null;
+  let categoryUsage = [];
 
-    for (let product of productArray) {
-        //sort out based on category
-        if (product.Categories === 'Acid') {
-            //add Usages together
-            acidUsage = acidUsage + product.Usage;
-            
-        } else if (product.Categories === 'Antibody') {
-            antibodyUsage = antibodyUsage + product.Usage;
-            
-        } else if (product.Categories === 'Bases') {
-            baseUsage = baseUsage + product.Usage;
-            
-        } else if (product.Categories === 'Common Compounds') {
-            commonCompUsage = commonCompUsage + product.Usage;
-            
-        }
+  for (let product of productArray) {
+    //sort out based on category
+    if (product.Categories === 'Acid') {
+      //add Usages together
+      acidUsage = acidUsage + product.Usage;
+    } else if (product.Categories === 'Antibody') {
+      antibodyUsage = antibodyUsage + product.Usage;
+    } else if (product.Categories === 'Bases') {
+      baseUsage = baseUsage + product.Usage;
+    } else if (product.Categories === 'Common Compounds') {
+      commonCompUsage = commonCompUsage + product.Usage;
     }
-    categoryUsage.push({'Category': 'Acid', 'Usage': acidUsage});
-    categoryUsage.push({'Category': 'Antibody', 'Usage': antibodyUsage});
-    categoryUsage.push({'Category': 'Bases', 'Usage': baseUsage});
-    categoryUsage.push({'Category': 'Common Compounds', 'Usage': commonCompUsage});
+  }
 
-    // for (let category of categoryUsage) {
-    //     if ()
-    // }
-    categoryUsage.sort(function(a, b){return a.Usage - b.Usage});
-    categoryUsage.reverse();
+  // add to array
+  categoryUsage.push({ Category: 'Acid', Usage: acidUsage });
+  categoryUsage.push({ Category: 'Antibody', Usage: antibodyUsage });
+  categoryUsage.push({ Category: 'Bases', Usage: baseUsage });
+  categoryUsage.push({ Category: 'Common Compounds', Usage: commonCompUsage });
 
-    console.log(categoryUsage);
-};
+  //sort array based on usage values
+  categoryUsage.sort(function (a, b) {
+    return a.Usage - b.Usage;
+  });
+  categoryUsage.reverse();
+
+  console.log(categoryUsage);
+}
 
 //top used product in "Common Compounds"
 function commonCompMaxUsage() {
-    let currentMax = null;
-    let currentMaxObj = null;
-    for (let product of productArray) {
-        //sort out based on category
-        if (product.Categories === 'Common Compounds') {
-            //compare most used
-            if (currentMax < product.Usage) {
-                currentMax = product.Usage;
-                currentMaxObj = product
-            }
-        }
+  let currentMax = null;
+  let currentMaxObj = null;
+  for (let product of productArray) {
+    //sort out based on category
+    if (product.Categories === 'Common Compounds') {
+      //compare most used
+      if (currentMax < product.Usage) {
+        currentMax = product.Usage;
+        currentMaxObj = product;
+      }
     }
-    console.log(currentMaxObj)
-};
+  }
+  console.log(currentMaxObj);
+}
 
 //top used product in "Antibody"
 function antibodyMaxUsage() {
-    let currentMax = null;
-    let currentMaxObj = null;
-    for (let product of productArray) {
-        //sort out based on category
-        if (product.Categories === 'Antibody') {
-            //compare most used
-            if (currentMax < product.Usage) {
-                currentMax = product.Usage;
-                currentMaxObj = product
-            }
-        }
+  let currentMax = null;
+  let currentMaxObj = null;
+  for (let product of productArray) {
+    //sort out based on category
+    if (product.Categories === 'Antibody') {
+      //compare most used
+      if (currentMax < product.Usage) {
+        currentMax = product.Usage;
+        currentMaxObj = product;
+      }
     }
-    console.log(currentMaxObj)
-};
-
+  }
+  console.log(currentMaxObj);
+}
 
 function outPutData(event) {
-    event.preventDefault();
-    console.log('button clicked');
-    combineArrays();
-  }
+  event.preventDefault();
+  console.log('button clicked');
+  combineArrays();
+}
 
 //Button activation
 submitButton.addEventListener('click', readFile.bind());
