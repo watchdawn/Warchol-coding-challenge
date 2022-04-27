@@ -169,6 +169,7 @@ function outPutData(event) {
   .then(console.log('entering then'))
   .catch(console.log('error'));
 }
+//test comment
 
 //rank Categories by amount of usage (greatest to least)
 
