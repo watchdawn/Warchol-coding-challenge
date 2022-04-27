@@ -162,24 +162,53 @@ function combineArrays() {
       };
     }
     console.log(productArray);
-}
 
-function outPutData(event) {
-  event.preventDefault();
-  console.log('button clicked');
-  combineArrays();
+    commonCompUsage();
+    antiBodyUsage();
 }
-//test comment
 
 //rank Categories by amount of usage (greatest to least)
 
 //top used product in "Common Compounds"
-//sort out based on category
-//compare most used
+function commonCompUsage() {
+    let currentMax = null;
+    let currentMaxObj = null;
+    for (let product of productArray) {
+        //sort out based on category
+        if (product.Categories === 'Common Compounds') {
+            //compare most used
+            if (currentMax < product.Usage) {
+                currentMax = product.Usage;
+                currentMaxObj = product
+            }
+        }
+    }
+    console.log(currentMaxObj)
+};
 
 //top used product in "Antibody"
-//sort out based on category
-//compare most used
+function antiBodyUsage() {
+    let currentMax = null;
+    let currentMaxObj = null;
+    for (let product of productArray) {
+        //sort out based on category
+        if (product.Categories === 'Antibody') {
+            //compare most used
+            if (currentMax < product.Usage) {
+                currentMax = product.Usage;
+                currentMaxObj = product
+            }
+        }
+    }
+    console.log(currentMaxObj)
+};
+
+
+function outPutData(event) {
+    event.preventDefault();
+    console.log('button clicked');
+    combineArrays();
+  }
 
 //Button activation
 submitButton.addEventListener('click', readFile.bind());
