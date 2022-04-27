@@ -163,14 +163,53 @@ function combineArrays() {
     }
     console.log(productArray);
 
-    commonCompUsage();
-    antiBodyUsage();
+    categoryRanking();
+    commonCompMaxUsage();
+    antibodyMaxUsage();
 }
 
 //rank Categories by amount of usage (greatest to least)
+// Categories: Common Compound, Acid, Antibody, Bases
+function categoryRanking() {
+    let acidUsage = null;
+    let antibodyUsage = null;
+    let baseUsage = null;
+    let commonCompUsage = null;
+    let categoryUsage = [];
+
+    for (let product of productArray) {
+        //sort out based on category
+        if (product.Categories === 'Acid') {
+            //add Usages together
+            acidUsage = acidUsage + product.Usage;
+            
+        } else if (product.Categories === 'Antibody') {
+            antibodyUsage = antibodyUsage + product.Usage;
+            
+        } else if (product.Categories === 'Bases') {
+            baseUsage = baseUsage + product.Usage;
+            
+        } else if (product.Categories === 'Common Compounds') {
+            commonCompUsage = commonCompUsage + product.Usage;
+            
+        }
+    }
+    categoryUsage.push({'Category': 'Acid', 'Usage': acidUsage});
+    categoryUsage.push({'Category': 'Antibody', 'Usage': antibodyUsage});
+    categoryUsage.push({'Category': 'Bases', 'Usage': baseUsage});
+    categoryUsage.push({'Category': 'Common Compounds', 'Usage': commonCompUsage});
+
+    // for (let category of categoryUsage) {
+    //     if ()
+    // }
+    categoryUsage.sort(function(a, b){return a.Usage - b.Usage});
+    categoryUsage.reverse();
+
+    console.log(categoryUsage);
+};
 
 //top used product in "Common Compounds"
-function commonCompUsage() {
+function commonCompMaxUsage() {
     let currentMax = null;
     let currentMaxObj = null;
     for (let product of productArray) {
@@ -187,7 +226,7 @@ function commonCompUsage() {
 };
 
 //top used product in "Antibody"
-function antiBodyUsage() {
+function antibodyMaxUsage() {
     let currentMax = null;
     let currentMaxObj = null;
     for (let product of productArray) {
