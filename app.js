@@ -3,6 +3,7 @@ const csvForm = document.getElementById('fileInputForm');
 const csvProductFile = document.getElementById('csvProduct');
 const csvUsageFile = document.getElementById('csvUsage');
 const submitButton = document.querySelector('button');
+const dataButton = document.getElementById('data');
 
 let usageArray = [];
 let productArray = [];
@@ -10,34 +11,27 @@ let productArray = [];
 //accept data
 //read file
 function readFile(event) {
-  //event.preventDefault();
-  const productReader = new FileReader();
-  const usageReader = new FileReader();
-
-  //const redFile = 
-  return new Promise((resolve) => {
+  event.preventDefault();
+  
     const csvCategories = csvProductFile.files[0];
     const csvAmounts = csvUsageFile.files[0];
 
-    
+    const productReader = new FileReader();
     productReader.addEventListener('load', function (event) {
       const text = event.target.result;
       parseProductCsv(text);
     });
 
-    
+    const usageReader = new FileReader();
     usageReader.addEventListener('load', function (event) {
       const text = event.target.result;
       parseUsageCsv(text);
       compactParseUsageArray(usageArray);
-      resolve(usageReader.result);
     });
 
     productReader.readAsText(csvCategories);
     usageReader.readAsText(csvAmounts);
-  });
-  //return redFile;
-}
+  };
 
 //parse data
 
@@ -145,29 +139,27 @@ function compactParseUsageArray(usageArray) {
 function combineArrays() {
   console.log('product array: ');
   console.log(productArray);
-  //   for (let product of productArray) {
-  //     for (let bit of compactUsageArray) {
-  //       if (product.Products !== bit.Products) {
-  //         flag2 = false;
-  //       } else if (product.Products === bit.Products) {
-  //         flag2 = true;
-  //       }
-  //     }
-  //     if (flag === true) {
-  //       product[Usage] = bit.Usage;
-  //     } else if (flag === false) {
-  //         product[Usage] = 0;
-  //     };
-  //     //console.log(productArray);
-  //   }
+    for (let product of productArray) {
+      for (let bit of compactUsageArray) {
+        if (product.Products !== bit.Products) {
+          flag2 = false;
+        } else if (product.Products === bit.Products) {
+          flag2 = true;
+        }
+      }
+      if (flag2 === true) {
+        product.Usage = bit.Usage;
+      } else if (flag2 === false) {
+          product.Usage = 0;
+      };
+      //console.log(productArray);
+    }
 }
 
 function outPutData(event) {
   event.preventDefault();
   console.log('button clicked');
-  readFile()
-  .then(console.log('entering then'))
-  .catch(console.log('error'));
+  combineArrays();
 }
 //test comment
 
@@ -182,4 +174,5 @@ function outPutData(event) {
 //compare most used
 
 //Button activation
-submitButton.addEventListener('click', outPutData.bind());
+submitButton.addEventListener('click', readFile.bind());
+dataButton.addEventListener('click', outPutData.bind());
