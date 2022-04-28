@@ -37,7 +37,7 @@ function readFile(event) {
 
 //parse data
 function parseProductCsv(str) {
-  key = new Array('Products', 'Categories');
+  key = ['Products', 'Categories'];
   const prodCat = str.trim().split('\n');
 
   //create new array of items from productCategory sheet so that items are separated by ; rather than ,
@@ -69,7 +69,7 @@ function parseProductCsv(str) {
 }
 
 function parseUsageCsv(str) {
-  key = new Array('Products', 'Usage');
+  key = ['Products', 'Usage'];
   const prodCat = str.trim().split('\n');
 
   //create new array of items from productCategory sheet so that items are separated by ; rather than ,
@@ -102,36 +102,21 @@ function parseUsageCsv(str) {
   //console.log(usageArray);
 }
 
-let compactUsageArray = [{ Products: '', Usage: null }];
+let compactUsageArray = [];
 
 // combine usage array entries so there is only one per product
 function compactParseUsageArray(usageArray) {
-  for (let object of usageArray) {
-    let flag = false;
-
-    for (let bit of compactUsageArray) {
-
-// compare if product exists in both arrays
-      if (object.Products !== bit.Products) {
-        flag = false;
-      } else if (object.Products === bit.Products) {
-        flag = true;
+  compactUsageArray = Object.entries(
+    usageArray.reduce(function (acc, item) {
+      if (item.Products in acc) {
+        acc[item.Products] += item.Usage;
+      } else {
+        acc[item.Products] = item.Usage;
       }
-    }
+      return acc;
+    }, {})
+  ).map(([key, value]) => ({ Products: key, Usage: value }));
 
-    // add usages together
-    if (flag === true) {
-      let objectIndex = compactUsageArray.findIndex(
-        (bit) => bit.Products === object.Products
-      );
-      compactUsageArray[objectIndex].Usage =
-        compactUsageArray[objectIndex].Usage + object.Usage;
-        // add new product to the array
-    } else if (flag === false) {
-      compactUsageArray.push(object);
-    }
-  }
-  compactUsageArray.shift();
   console.log(compactUsageArray);
 }
 
@@ -140,26 +125,24 @@ function compactParseUsageArray(usageArray) {
 function combineArrays() {
   //select item from productArray
   for (let product of productArray) {
-    let flag2 = null;
+    let flag2 = false;
 
     //select item  from compactUsage Array and compare the object.Product looking for match
     for (let bit of compactUsageArray) {
-      if (product.Products !== bit.Products) {
-        flag2 = false;
-      } else if (product.Products === bit.Products) {
+      if (product.Products === bit.Products) {
         flag2 = true;
         break;
       }
     }
 
     // take usage amount from usageArray and add it to productArray
-    if (flag2 === true) {
+    if (flag2) {
       let objectUsage = compactUsageArray.findIndex(
-        (bit) => bit.Products === product.Products
+        (entry) => entry.Products === product.Products
       );
       product.Usage = compactUsageArray[objectUsage].Usage;
       //If product is not in compactUsageArray assign usage value to zero
-    } else if (flag2 === false) {
+    } else {
       product.Usage = 0;
     }
   }
@@ -201,10 +184,7 @@ function categoryRanking() {
   categoryUsage.push({ Category: 'Common Compounds', Usage: commonCompUsage });
 
   //sort array based on usage values
-  categoryUsage.sort(function (a, b) {
-    return a.Usage - b.Usage;
-  });
-  categoryUsage.reverse();
+  categoryUsage.sort((a, b) => (a.Usage - b.Usage) * -1);
 
   console.log(categoryUsage);
 }
@@ -245,7 +225,6 @@ function antibodyMaxUsage() {
 
 function outPutData(event) {
   event.preventDefault();
-  console.log('button clicked');
   combineArrays();
 }
 
